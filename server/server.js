@@ -25,28 +25,41 @@ const storage = multer.diskStorage({
 
 const upload = multer({ storage: storage });
 
-// Ruta para subir videos
+// Ruta para subir videos o de carga de videos
 app.post('/upload', upload.single('video'), (req, res) => {
     if (!req.file) {
         return res.status(400).send('No se subió ningún archivo.');
     }
+
+    const videoInfo = {
+        title: req.body.title,
+        description: req.body.description,
+        storeName: req.body.storeName,
+        location: req.body.location,
+        fileName: req.file.filename
+    };
+
+    // Aquí deberías guardar videoInfo en una base de datos
+    // Por ahora, lo guardaremos en un archivo JSON
+    const dataPath = path.join(__dirname, 'videoData.json');
+    let videos = [];
+    if (fs.existsSync(dataPath)) {
+        videos = JSON.parse(fs.readFileSync(dataPath));
+    }
+    videos.push(videoInfo);
+    fs.writeFileSync(dataPath, JSON.stringify(videos));
+
     res.send('Archivo subido con éxito.');
 });
 // Ruta para obtener la lista de videos
 app.get('/videos', (req, res) => {
-    const uploadsDir = path.join(__dirname, 'uploads');
-    fs.readdir(uploadsDir, (err, files) => {
-        if (err) {
-            return res.status(500).json({ error: 'Error al leer los archivos' });
-        }
-
-        const videos = files.map(file => ({
-            name: file,
-            url: `/uploads/${file}`
-        }));
-
+    const dataPath = path.join(__dirname, 'videoData.json');
+    if (fs.existsSync(dataPath)) {
+        const videos = JSON.parse(fs.readFileSync(dataPath));
         res.json(videos);
-    });
+    } else {
+        res.json([]);
+    }
 });
 // Servir archivos estáticos desde la carpeta 'uploads'
 app.use('/uploads', express.static('uploads'));
