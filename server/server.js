@@ -1,3 +1,7 @@
+const fs = require('fs');
+const path = require('path');
+
+// ... (código existente)
 const express = require('express');
 const multer = require('multer');
 const path = require('path');
@@ -28,6 +32,26 @@ app.post('/upload', upload.single('video'), (req, res) => {
     }
     res.send('Archivo subido con éxito.');
 });
+// Ruta para obtener la lista de videos
+app.get('/videos', (req, res) => {
+    const uploadsDir = path.join(__dirname, 'uploads');
+    fs.readdir(uploadsDir, (err, files) => {
+        if (err) {
+            return res.status(500).json({ error: 'Error al leer los archivos' });
+        }
+
+        const videos = files.map(file => ({
+            name: file,
+            url: `/uploads/${file}`
+        }));
+
+        res.json(videos);
+    });
+});
+// Servir archivos estáticos desde la carpeta 'uploads'
+app.use('/uploads', express.static('uploads'));
+
+// ... (resto del código)
 
 app.listen(port, () => {
     console.log(`Servidor corriendo en http://localhost:${port}`);

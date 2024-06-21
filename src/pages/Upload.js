@@ -62,82 +62,98 @@ const Upload = () => {
         }, 500);
     };
 
-    const handleSubmit = (event) => {
+    const handleSubmit = async (event) => {
         event.preventDefault();
         if (validateForm()) {
-            simulateUpload();
-            // Aquí iría la lógica para enviar los datos al servidor
-            console.log('Datos del video:', videoData);
+            setIsUploading(true);
+            setUploadProgress(0);
+
+            const formData = new FormData();
+            formData.append('title', videoData.title);
+            formData.append('description', videoData.description);
+            formData.append('storeName', videoData.storeName);
+            formData.append('location', videoData.location);
+            formData.append('video', videoData.file);
+
+            try {
+                // Simular progreso
+                const progressInterval = setInterval(() => {
+                    setUploadProgress(prev => (prev >= 90 ? 90 : prev + 10));
+                }, 500);
+
+                const response = await fetch('http://localhost:5000/upload', {
+                    method: 'POST',
+                    body: formData,
+                });
+
+                clearInterval(progressInterval);  // Detener la simulación de progreso
+
+                if (response.ok) {
+                    setUploadProgress(100);
+                    alert('Video subido con éxito!');
+                    setVideoData({
+                        title: '',
+                        description: '',
+                        storeName: '',
+                        location: '',
+                        file: null
+                    });
+                } else {
+                    throw new Error('Error al subir el video');
+                }
+            } catch (error) {
+                alert('Error al subir el video: ' + error.message);
+            } finally {
+                setIsUploading(false);
+            }
         }
     };
+
+    // ... (resto del código sin cambios)
 
     return (
         <div style={styles.container}>
             <h2>Subir Video</h2>
             <form onSubmit={handleSubmit} style={styles.form}>
-                <input
-                    type="text"
-                    name="title"
-                    value={videoData.title}
-                    onChange={handleInputChange}
-                    placeholder="Título del video"
-                    style={styles.input}
-                />
-                {errors.title && <span style={styles.error}>{errors.title}</span>}
-
-                <textarea
-                    name="description"
-                    value={videoData.description}
-                    onChange={handleInputChange}
-                    placeholder="Descripción del video"
-                    style={styles.textarea}
-                />
-                {errors.description && <span style={styles.error}>{errors.description}</span>}
-
-                <input
-                    type="text"
-                    name="storeName"
-                    value={videoData.storeName}
-                    onChange={handleInputChange}
-                    placeholder="Nombre de la tienda"
-                    style={styles.input}
-                />
-                {errors.storeName && <span style={styles.error}>{errors.storeName}</span>}
-
-                <input
-                    type="text"
-                    name="location"
-                    value={videoData.location}
-                    onChange={handleInputChange}
-                    placeholder="Ubicación de la tienda"
-                    style={styles.input}
-                />
-                {errors.location && <span style={styles.error}>{errors.location}</span>}
-
-                <input
-                    type="file"
-                    onChange={handleFileChange}
-                    accept="video/*"
-                    style={styles.fileInput}
-                />
-                {errors.file && <span style={styles.error}>{errors.file}</span>}
-
-                {isUploading && (
-                    <div style={styles.progressContainer}>
-                        <div style={{ ...styles.progressBar, width: `${uploadProgress}%` }}></div>
-                    </div>
-                )}
-
-                <button type="submit" style={styles.button} disabled={isUploading}>
-                    {isUploading ? 'Subiendo...' : 'Subir Video'}
-                </button>
+                {/* ... (resto del formulario sin cambios) */}
             </form>
         </div>
     );
 };
 
 const styles = {
-    // ... (mantén los estilos existentes)
+    container: {
+        maxWidth: '600px',
+        margin: '0 auto',
+        padding: '20px',
+    },
+    form: {
+        display: 'flex',
+        flexDirection: 'column',
+    },
+    input: {
+        margin: '10px 0',
+        padding: '10px',
+        fontSize: '16px',
+    },
+    textarea: {
+        margin: '10px 0',
+        padding: '10px',
+        fontSize: '16px',
+        minHeight: '100px',
+    },
+    fileInput: {
+        margin: '10px 0',
+    },
+    button: {
+        margin: '20px 0',
+        padding: '10px',
+        fontSize: '18px',
+        backgroundColor: '#4a90e2',
+        color: 'white',
+        border: 'none',
+        cursor: 'pointer',
+    },
     error: {
         color: 'red',
         fontSize: '14px',
