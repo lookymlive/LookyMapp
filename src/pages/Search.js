@@ -5,72 +5,56 @@ const Search = () => {
     const [searchTerm, setSearchTerm] = useState('');
     const [searchResults, setSearchResults] = useState([]);
 
-    // Datos de muestra
-    const allVideos = [
-        { id: 1, title: 'Tienda de ropa XYZ', thumbnail: 'https://via.placeholder.com/300x200.png?text=Tienda+XYZ' },
-        { id: 2, title: 'Zapatería ABC', thumbnail: 'https://via.placeholder.com/300x200.png?text=Zapatería+ABC' },
-        { id: 3, title: 'Joyería 123', thumbnail: 'https://via.placeholder.com/300x200.png?text=Joyería+123' },
-        { id: 4, title: 'Tienda de electrónica QWE', thumbnail: 'https://via.placeholder.com/300x200.png?text=Electrónica+QWE' },
-        { id: 5, title: 'Librería ZXC', thumbnail: 'https://via.placeholder.com/300x200.png?text=Librería+ZXC' },
-    ];
-
-    const handleSearch = (event) => {
-        event.preventDefault();
-        const results = allVideos.filter(video =>
-            video.title.toLowerCase().includes(searchTerm.toLowerCase())
-        );
-        setSearchResults(results);
+    const handleSearch = async (e) => {
+        e.preventDefault();
+        try {
+            const response = await fetch(`/api/videos/search?term=${searchTerm}`);
+            if (!response.ok) {
+                throw new Error('Error en la búsqueda');
+            }
+            const data = await response.json();
+            setSearchResults(data);
+        } catch (error) {
+            console.error('Error:', error);
+        }
     };
 
     return (
         <div>
-            <h2>Buscar Videos</h2>
-            <form onSubmit={handleSearch} style={styles.form}>
-                <input
-                    type="text"
-                    placeholder="Buscar..."
-                    value={searchTerm}
-                    onChange={(e) => setSearchTerm(e.target.value)}
-                    style={styles.input}
-                />
-                <button type="submit" style={styles.button}>Buscar</button>
+            <h2 className="text-2xl font-bold mb-6">Buscar Videos</h2>
+            <form onSubmit={handleSearch} className="mb-8">
+                <div className="flex">
+                    <input
+                        type="text"
+                        value={searchTerm}
+                        onChange={(e) => setSearchTerm(e.target.value)}
+                        placeholder="Buscar videos..."
+                        className="flex-grow px-3 py-2 bg-gray-700 text-white rounded-l-md focus:outline-none focus:ring-2 focus:ring-primary"
+                    />
+                    <button type="submit" className="bg-primary text-black font-bold py-2 px-4 rounded-r-md hover:bg-opacity-80 transition-colors duration-300">
+                        Buscar
+                    </button>
+                </div>
             </form>
-            <div style={styles.results}>
-                {searchResults.length > 0 ? (
-                    searchResults.map(video => (
-                        <VideoCard key={video.id} title={video.title} thumbnail={video.thumbnail} />
-                    ))
-                ) : (
-                    <p>No se encontraron resultados.</p>
-                )}
+
+            <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-6 gap-6">
+                {searchResults.map((video) => (
+                    <div key={video._id} className="bg-surface rounded-lg overflow-hidden shadow-lg transition-transform duration-300 hover:scale-105">
+                        <div className="aspect-w-16 aspect-h-9">
+                            <video controls className="object-cover w-full h-full">
+                                <source src={`/uploads/${video.fileName}`} type="video/mp4" />
+                                Tu navegador no soporta el tag de video.
+                            </video>
+                        </div>
+                        <div className="p-4">
+                            <h3 className="text-lg font-semibold mb-2 truncate">{video.title}</h3>
+                            <p className="text-sm text-gray-400">{video.storeId.storeName}</p>
+                        </div>
+                    </div>
+                ))}
             </div>
         </div>
     );
-};
-
-const styles = {
-    form: {
-        display: 'flex',
-        marginBottom: '1rem',
-    },
-    input: {
-        flex: 1,
-        padding: '0.5rem',
-        fontSize: '1rem',
-    },
-    button: {
-        padding: '0.5rem 1rem',
-        fontSize: '1rem',
-        backgroundColor: '#4a90e2',
-        color: 'white',
-        border: 'none',
-        cursor: 'pointer',
-    },
-    results: {
-        display: 'flex',
-        flexWrap: 'wrap',
-        justifyContent: 'center',
-    },
 };
 
 export default Search;

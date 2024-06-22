@@ -33,5 +33,11 @@ module.exports = {
         compress: true,
         port: 3000,
         historyApiFallback: true, // This is important for SPA routing
+        proxy: {
+            '/api': {
+                target: 'http://localhost:5000',
+                changeOrigin: true,
+            }
+        }
     },
 };

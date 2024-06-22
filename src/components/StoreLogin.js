@@ -31,16 +31,17 @@ function StoreLogin() {
   };
 
   return (
-    <div>
-      <h2>Iniciar Sesión de Tienda</h2>
-      {message && <p style={{color: message.includes('exitoso') ? 'green' : 'red'}}>{message}</p>}
-      <form onSubmit={handleSubmit}>
+    <div className="max-w-md mx-auto">
+      <h2 className="text-2xl font-bold mb-6">Iniciar Sesión de Tienda</h2>
+      {message && <p className={`mb-4 ${message.includes('exitoso') ? 'text-green-500' : 'text-red-500'}`}>{message}</p>}
+      <form onSubmit={handleSubmit} className="space-y-4">
         <input
           type="email"
           placeholder="Correo electrónico"
           value={email}
           onChange={(e) => setEmail(e.target.value)}
           required
+          className="w-full px-3 py-2 bg-gray-700 text-white rounded-md focus:outline-none focus:ring-2 focus:ring-primary"
         />
         <input
           type="password"
@@ -48,8 +49,11 @@ function StoreLogin() {
           value={password}
           onChange={(e) => setPassword(e.target.value)}
           required
+          className="w-full px-3 py-2 bg-gray-700 text-white rounded-md focus:outline-none focus:ring-2 focus:ring-primary"
         />
-        <button type="submit">Iniciar Sesión</button>
+        <button type="submit" className="w-full bg-primary text-black font-bold py-2 px-4 rounded hover:bg-opacity-80 transition-colors duration-300">
+          Iniciar Sesión
+        </button>
       </form>
     </div>
   );

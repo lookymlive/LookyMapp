@@ -44,27 +44,34 @@ function Upload() {
   };
 
   return (
-    <div>
-      <h2>Subir Video</h2>
-      {message && <p>{message}</p>}
-      <form onSubmit={handleSubmit}>
-        <input 
-          type="file" 
-          accept="video/*"
-          onChange={(e) => setFile(e.target.files[0])}
-        />
+    <div className="max-w-md mx-auto">
+      <h2 className="text-2xl font-bold mb-6">Subir Video</h2>
+      {message && <p className={`mb-4 ${message.includes('exitosamente') ? 'text-green-500' : 'text-red-500'}`}>{message}</p>}
+      <form onSubmit={handleSubmit} className="space-y-4">
+        <div>
+          <label htmlFor="file" className="block text-sm font-medium mb-2">Seleccionar video</label>
+          <input 
+            type="file" 
+            id="file"
+            accept="video/*"
+            onChange={(e) => setFile(e.target.files[0])}
+            className="w-full px-3 py-2 bg-gray-700 text-white rounded-md focus:outline-none focus:ring-2 focus:ring-primary"
+          />
+        </div>
         <input
           type="text"
           placeholder="Título del video"
           value={title}
           onChange={(e) => setTitle(e.target.value)}
           required
+          className="w-full px-3 py-2 bg-gray-700 text-white rounded-md focus:outline-none focus:ring-2 focus:ring-primary"
         />
         <textarea
           placeholder="Descripción del video"
           value={description}
           onChange={(e) => setDescription(e.target.value)}
           required
+          className="w-full px-3 py-2 bg-gray-700 text-white rounded-md focus:outline-none focus:ring-2 focus:ring-primary"
         />
         <button type="submit">Subir Video</button>
       </form>

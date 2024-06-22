@@ -6,47 +6,66 @@ function VideoList() {
   const [error, setError] = useState(null);
 
   useEffect(() => {
-    fetchVideos();
+    fetchRecentVideos();
   }, []);
 
-  const fetchVideos = async () => {
+  const fetchRecentVideos = async () => {
     try {
-      const response = await fetch('/api/videos');
+      setLoading(true);
+      const response = await fetch('/api/videos?limit=6');
+      console.log('Response status:', response.status);
+      console.log('Response headers:', response.headers);
+      
+      const text = await response.text();
+      console.log('Response text:', text);
+  
       if (!response.ok) {
-        throw new Error('Error al obtener los videos');
+        throw new Error(`HTTP error! status: ${response.status}`);
       }
-      const data = await response.json();
+      
+      const contentType = response.headers.get("content-type");
+      if (!contentType || !contentType.includes("application/json")) {
+        throw new Error(`Oops, we haven't got JSON! Content-Type: ${contentType}`);
+      }
+      
+      const data = JSON.parse(text);
+      console.log('Datos recibidos:', data);
       setVideos(data);
-      setLoading(false);
+      setError(null);
     } catch (error) {
-      console.error('Error:', error);
-      setError('Error al cargar los videos');
+      console.error('Error fetching videos:', error);
+      setError(error.message);
+    } finally {
       setLoading(false);
     }
   };
 
-  if (loading) return <div className="text-center">Cargando videos...</div>;
-  if (error) return <div className="text-center text-red-500">{error}</div>;
+  if (loading) return <div className="text-center py-10">Cargando videos...</div>;
+  if (error) return <div className="text-center py-10 text-red-500">{error}</div>;
 
   return (
-    <div>
-      <h2 className="text-2xl font-bold mb-6">Videos Recientes</h2>
-      <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-6 gap-6">
-        {videos.map((video) => (
-          <div key={video._id} className="bg-surface rounded-lg overflow-hidden shadow-lg transition-transform duration-300 hover:scale-105">
-            <div className="aspect-w-16 aspect-h-9">
-              <video controls className="object-cover w-full h-full">
-                <source src={`/uploads/${video.fileName}`} type="video/mp4" />
-                Tu navegador no soporta el tag de video.
-              </video>
+    <div className="max-w-3xl mx-auto">
+      <h2 className="text-2xl font-bold mb-6 text-center">Videos Recientes</h2>
+      {videos.length === 0 ? (
+        <p className="text-center">No hay videos disponibles.</p>
+      ) : (
+        <div className="space-y-8">
+          {videos.map((video) => (
+            <div key={video._id} className="bg-surface rounded-lg overflow-hidden shadow-lg">
+              <div className="aspect-w-9 aspect-h-16">
+                <video controls className="object-cover w-full h-full">
+                  <source src={`/uploads/${video.fileName}`} type="video/mp4" />
+                  Tu navegador no soporta el tag de video.
+                </video>
+              </div>
+              <div className="p-4">
+                <h3 className="text-lg font-semibold mb-2">{video.title}</h3>
+                <p className="text-sm text-gray-400">{video.storeId?.storeName}</p>
+              </div>
             </div>
-            <div className="p-4">
-              <h3 className="text-lg font-bold mb-2">{video.title}</h3>
-              <p className="text-gray-700">{video.storeId.storeName}</p>
-            </div>
-          </div>
-        ))}
-      </div>
+          ))}
+        </div>
+      )}
     </div>
   );
 }

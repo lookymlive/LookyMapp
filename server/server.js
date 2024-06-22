@@ -6,12 +6,21 @@ const fs = require('fs');
 const mongoose = require('mongoose');
 const bcrypt = require('bcrypt');
 const jwt = require('jsonwebtoken'); // Added this line to require jwt
+require('dotenv').config();
 
 const app = express();
 const port = 5000;
 
 app.use(cors());
 app.use(express.json());
+// Middleware para registrar las solicitudes
+app.use((req, res, next) => {
+    console.log(`${req.method} ${req.url}`);
+    console.log('Headers:', req.headers);
+    console.log('Body:', req.body);
+    next();
+});
+
 
 // Configurar multer para el almacenamiento de archivos
 const storage = multer.diskStorage({
@@ -66,8 +75,12 @@ app.get('/videos', (req, res) => {
 app.use('/uploads', express.static('uploads'));
 
 // Conectar a MongoDB (asegúrate de tener MongoDB instalado y ejecutándose)
-mongoose.connect('mongodb://localhost/lookymapp', { useNewUrlParser: true, useUnifiedTopology: true });
-
+mongoose.connect('mongodb://localhost/lookymapp')
+  .then(() => console.log('Conectado a MongoDB'))
+  .catch(err => {
+    console.error('Error al conectar a MongoDB:', err);
+    process.exit(1); // Termina el proceso si no se puede conectar a MongoDB
+  });
 // Definir el modelo de Store
 const Store = mongoose.model('Store', {
   storeName: String,
@@ -185,17 +198,17 @@ app.post('/api/videos/upload', verifyToken, upload.single('video'), async (req, 
 
 // Endpoint para obtener todos los videos
 app.get('/api/videos', async (req, res) => {
-  try {
-    const limit = parseInt(req.query.limit) || 0;
-    const videos = await Video.find()
-      .populate('storeId', 'storeName')
-      .limit(limit)
-      .sort({ createdAt: -1 });
-    res.json(videos);
-  } catch (error) {
-    console.error('Error al obtener los videos:', error);
-    res.status(500).json({ message: 'Error al obtener los videos' });
-  }
+    console.log('Recibida solicitud para /api/videos');
+    try {
+      const limit = parseInt(req.query.limit) || 6;
+      console.log(`Buscando videos con límite: ${limit}`);
+      const videos = await Video.find().limit(limit).sort({ createdAt: -1 }).populate('storeId', 'storeName');
+      console.log(`Encontrados ${videos.length} videos`);
+      res.json(videos);
+    } catch (error) {
+      console.error('Error al obtener videos:', error);
+      res.status(500).json({ message: 'Error al obtener videos', error: error.message });
+    }
 });
 
 app.listen(port, () => {

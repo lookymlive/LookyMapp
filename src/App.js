@@ -1,6 +1,5 @@
 import React from 'react';
 import { BrowserRouter as Router, Route, Routes, Link } from 'react-router-dom';
-import Header from './components/Header';
 import Home from './pages/Home';
 import Search from './pages/Search';
 import Upload from './pages/Upload';
@@ -11,19 +10,21 @@ import StoreLogin from './components/StoreLogin';
 const App = () => {
     return (
         <Router>
-            <div className="min-h-screen bg-background">
-                <Header />
-                <nav className="bg-surface py-4">
-                    <ul className="flex justify-center space-x-6">
-                        <li><Link to="/" className="text-text hover:text-primary">Inicio</Link></li>
-                        <li><Link to="/search" className="text-text hover:text-primary">Buscar</Link></li>
-                        <li><Link to="/upload" className="text-text hover:text-primary">Subir Video</Link></li>
-                        <li><Link to="/videos" className="text-text hover:text-primary">Ver Videos</Link></li>
-                        <li><Link to="/register-store" className="text-text hover:text-primary">Registrar Tienda</Link></li>
-                        <li><Link to="/login-store" className="text-text hover:text-primary">Iniciar Sesión</Link></li>
-                    </ul>
+            <div className="min-h-screen bg-black text-white">
+                <nav className="bg-gray-900 p-4 fixed w-full top-0 z-50">
+                    <div className="container mx-auto flex justify-between items-center">
+                        <Link to="/" className="text-2xl font-bold text-primary">LookyMapp</Link>
+                        <ul className="flex space-x-4">
+                            <li><Link to="/" className="hover:text-primary transition-colors">Inicio</Link></li>
+                            <li><Link to="/search" className="hover:text-primary transition-colors">Buscar</Link></li>
+                            <li><Link to="/upload" className="hover:text-primary transition-colors">Subir</Link></li>
+                            <li><Link to="/videos" className="hover:text-primary transition-colors">Videos</Link></li>
+                            <li><Link to="/register-store" className="hover:text-primary transition-colors">Registrar</Link></li>
+                            <li><Link to="/login-store" className="hover:text-primary transition-colors">Iniciar Sesión</Link></li>
+                        </ul>
+                    </div>
                 </nav>
-                <main className="container mx-auto px-4 py-8">
+                <main className="container mx-auto pt-20 px-4">
                     <Routes>
                         <Route path="/" element={<Home />} />
                         <Route path="/search" element={<Search />} />

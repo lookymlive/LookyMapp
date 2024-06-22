@@ -2,6 +2,7 @@
   "name": "lookymapp",
   "version": "1.0.0",
   "main": "index.js",
+  "proxy": "http://localhost:5000",
   "scripts": {
     "start": "webpack serve --mode development --open",
     "build": "webpack --mode production"
@@ -15,6 +16,7 @@
     "bcrypt": "^5.1.1",
     "body-parser": "^1.20.2",
     "cors": "^2.8.5",
+    "dotenv": "^16.4.5",
     "express": "^4.19.2",
     "jsonwebtoken": "^9.0.2",
     "mongoose": "^8.4.3",
@@ -37,6 +39,5 @@
     "webpack": "^5.92.1",
     "webpack-cli": "^5.1.4",
     "webpack-dev-server": "^5.0.4"
-  },
-  "proxy": "http://localhost:5000"
+  }
 }
