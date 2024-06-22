@@ -1,7 +1,6 @@
 import React, { useState } from 'react';
 
-function StoreRegister() {
-  const [storeName, setStoreName] = useState('');
+function StoreLogin() {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [message, setMessage] = useState('');
@@ -10,44 +9,32 @@ function StoreRegister() {
     e.preventDefault();
     setMessage('');
     try {
-      const response = await fetch('/api/stores/register', {
+      const response = await fetch('/api/stores/login', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
         },
-        body: JSON.stringify({
-          storeName,
-          email,
-          password
-        }),
+        body: JSON.stringify({ email, password }),
       });
       const data = await response.json();
       if (response.ok) {
-        setMessage('Registro exitoso. Ya puedes iniciar sesión.');
-        setStoreName('');
-        setEmail('');
-        setPassword('');
+        setMessage('Inicio de sesión exitoso');
+        localStorage.setItem('token', data.token);
+        // Aquí puedes redirigir al usuario o actualizar el estado de la aplicación
       } else {
-        setMessage(data.message || 'Error en el registro. Por favor, intenta de nuevo.');
+        setMessage(data.message || 'Error en el inicio de sesión');
       }
     } catch (error) {
-      console.error('Error al registrar la tienda:', error);
+      console.error('Error en el inicio de sesión:', error);
       setMessage('Error en el servidor. Por favor, intenta más tarde.');
     }
   };
 
   return (
-    <div className="container">
-      <h2>Registro de Tienda</h2>
+    <div>
+      <h2>Iniciar Sesión de Tienda</h2>
       {message && <p style={{color: message.includes('exitoso') ? 'green' : 'red'}}>{message}</p>}
       <form onSubmit={handleSubmit}>
-        <input
-          type="text"
-          placeholder="Nombre de la tienda"
-          value={storeName}
-          onChange={(e) => setStoreName(e.target.value)}
-          required
-        />
         <input
           type="email"
           placeholder="Correo electrónico"
@@ -62,10 +49,10 @@ function StoreRegister() {
           onChange={(e) => setPassword(e.target.value)}
           required
         />
-        <button type="submit">Registrar</button>
+        <button type="submit">Iniciar Sesión</button>
       </form>
     </div>
   );
 }
 
-export default StoreRegister;
+export default StoreLogin;

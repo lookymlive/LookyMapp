@@ -153,6 +153,51 @@ app.get('/api/stores/profile', verifyToken, async (req, res) => {
   }
 });
 
+// Modelo para los videos
+const Video = mongoose.model('Video', {
+  title: String,
+  description: String,
+  fileName: String,
+  storeId: mongoose.Schema.Types.ObjectId
+});
+
+// Endpoint para subir videos
+app.post('/api/videos/upload', verifyToken, upload.single('video'), async (req, res) => {
+  if (!req.file) {
+    return res.status(400).json({ message: 'No se subió ningún archivo' });
+  }
+
+  try {
+    const newVideo = new Video({
+      title: req.body.title,
+      description: req.body.description,
+      fileName: req.file.filename,
+      storeId: req.store.id
+    });
+
+    await newVideo.save();
+    res.status(201).json({ message: 'Video subido exitosamente' });
+  } catch (error) {
+    console.error('Error al guardar el video:', error);
+    res.status(500).json({ message: 'Error al guardar el video' });
+  }
+});
+
+// Endpoint para obtener todos los videos
+app.get('/api/videos', async (req, res) => {
+  try {
+    const limit = parseInt(req.query.limit) || 0;
+    const videos = await Video.find()
+      .populate('storeId', 'storeName')
+      .limit(limit)
+      .sort({ createdAt: -1 });
+    res.json(videos);
+  } catch (error) {
+    console.error('Error al obtener los videos:', error);
+    res.status(500).json({ message: 'Error al obtener los videos' });
+  }
+});
+
 app.listen(port, () => {
     console.log(`Servidor corriendo en http://localhost:${port}`);
 });

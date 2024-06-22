@@ -11,19 +11,19 @@ import StoreLogin from './components/StoreLogin';
 const App = () => {
     return (
         <Router>
-            <div>
+            <div className="min-h-screen bg-background">
                 <Header />
-                <nav>
-                    <ul>
-                        <li><Link to="/">Inicio</Link></li>
-                        <li><Link to="/search">Buscar</Link></li>
-                        <li><Link to="/upload">Subir Video</Link></li>
-                        <li><Link to="/videos">Ver Videos</Link></li>
-                        <li><Link to="/register-store">Registrar Tienda</Link></li>
-                        <li><Link to="/login-store">Iniciar Sesión</Link></li>
+                <nav className="bg-surface py-4">
+                    <ul className="flex justify-center space-x-6">
+                        <li><Link to="/" className="text-text hover:text-primary">Inicio</Link></li>
+                        <li><Link to="/search" className="text-text hover:text-primary">Buscar</Link></li>
+                        <li><Link to="/upload" className="text-text hover:text-primary">Subir Video</Link></li>
+                        <li><Link to="/videos" className="text-text hover:text-primary">Ver Videos</Link></li>
+                        <li><Link to="/register-store" className="text-text hover:text-primary">Registrar Tienda</Link></li>
+                        <li><Link to="/login-store" className="text-text hover:text-primary">Iniciar Sesión</Link></li>
                     </ul>
                 </nav>
-                <main style={styles.main}>
+                <main className="container mx-auto px-4 py-8">
                     <Routes>
                         <Route path="/" element={<Home />} />
                         <Route path="/search" element={<Search />} />
@@ -36,12 +36,6 @@ const App = () => {
             </div>
         </Router>
     );
-};
-
-const styles = {
-    main: {
-        padding: '1rem',
-    },
 };
 
 export default App;
