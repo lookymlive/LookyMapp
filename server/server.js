@@ -6,13 +6,17 @@ const fs = require('fs');
 const mongoose = require('mongoose');
 const bcrypt = require('bcrypt');
 const jwt = require('jsonwebtoken'); // Added this line to require jwt
-require('dotenv').config();
+const dotenv = require('dotenv');
+
+dotenv.config();
 
 const app = express();
 const port = 5000;
 
 app.use(cors());
-app.use(express.json());
+app.use(express.json({ limit: '50mb' }));
+app.use(express.urlencoded({ limit: '50mb', extended: true }));
+
 // Middleware para registrar las solicitudes
 app.use((req, res, next) => {
     console.log(`${req.method} ${req.url}`);
@@ -32,7 +36,7 @@ const storage = multer.diskStorage({
     }
 });
 
-const upload = multer({ storage: storage });
+const upload = multer({ storage: storage, limits: { fileSize: 50 * 1024 * 1024 } }); // 50 MB
 
 // Ruta para subir videos
 app.post('/upload', upload.single('video'), (req, res) => {
@@ -72,15 +76,15 @@ app.get('/videos', (req, res) => {
 });
 
 // Servir archivos estáticos desde la carpeta 'uploads'
-app.use('/uploads', express.static('uploads'));
+app.use('/uploads', express.static(path.join(__dirname, 'uploads')));
 
 // Conectar a MongoDB (asegúrate de tener MongoDB instalado y ejecutándose)
-mongoose.connect('mongodb://localhost/lookymapp')
-  .then(() => console.log('Conectado a MongoDB'))
-  .catch(err => {
-    console.error('Error al conectar a MongoDB:', err);
-    process.exit(1); // Termina el proceso si no se puede conectar a MongoDB
-  });
+mongoose.connect(process.env.MONGODB_URI)
+    .then(() => console.log('Conectado a MongoDB'))
+    .catch(err => {
+        console.error('Error al conectar a MongoDB:', err);
+        process.exit(1); // Termina el proceso si no se puede conectar a MongoDB
+    });
 // Definir el modelo de Store
 const Store = mongoose.model('Store', {
   storeName: String,
@@ -167,48 +171,58 @@ app.get('/api/stores/profile', verifyToken, async (req, res) => {
 });
 
 // Modelo para los videos
-const Video = mongoose.model('Video', {
+const VideoSchema = new mongoose.Schema({
   title: String,
   description: String,
   fileName: String,
-  storeId: mongoose.Schema.Types.ObjectId
+  storeId: { type: mongoose.Schema.Types.ObjectId, ref: 'Store' },
+  createdAt: { type: Date, default: Date.now }
 });
+
+const Video = mongoose.model('Video', VideoSchema);
 
 // Endpoint para subir videos
 app.post('/api/videos/upload', verifyToken, upload.single('video'), async (req, res) => {
+  console.log('Recibida solicitud para subir video');
   if (!req.file) {
+    console.log('No se recibió ningún archivo');
     return res.status(400).json({ message: 'No se subió ningún archivo' });
   }
 
+  console.log('Archivo recibido:', req.file.filename);
   try {
+    console.log('Datos del video:', req.body);
+
     const newVideo = new Video({
       title: req.body.title,
       description: req.body.description,
       fileName: req.file.filename,
-      storeId: req.store.id
+      storeId: req.store.storeId // Asegúrate de que esto sea correcto
     });
 
-    await newVideo.save();
-    res.status(201).json({ message: 'Video subido exitosamente' });
+    const savedVideo = await newVideo.save();
+    console.log('Video guardado en la base de datos:', savedVideo);
+
+    res.status(201).json({ message: 'Video subido exitosamente', video: savedVideo });
   } catch (error) {
     console.error('Error al guardar el video:', error);
-    res.status(500).json({ message: 'Error al guardar el video' });
+    res.status(500).json({ message: 'Error al guardar el video', error: error.message });
   }
 });
 
 // Endpoint para obtener todos los videos
 app.get('/api/videos', async (req, res) => {
-    console.log('Recibida solicitud para /api/videos');
-    try {
-      const limit = parseInt(req.query.limit) || 6;
-      console.log(`Buscando videos con límite: ${limit}`);
-      const videos = await Video.find().limit(limit).sort({ createdAt: -1 }).populate('storeId', 'storeName');
-      console.log(`Encontrados ${videos.length} videos`);
-      res.json(videos);
-    } catch (error) {
-      console.error('Error al obtener videos:', error);
-      res.status(500).json({ message: 'Error al obtener videos', error: error.message });
-    }
+  console.log('Recibida solicitud para /api/videos');
+  try {
+    const limit = parseInt(req.query.limit) || 6;
+    console.log(`Buscando videos con límite: ${limit}`);
+    const videos = await Video.find().limit(limit).sort({ createdAt: -1 }).populate('storeId', 'storeName');
+    console.log(`Encontrados ${videos.length} videos:`, videos);
+    res.json(videos);
+  } catch (error) {
+    console.error('Error al obtener videos:', error);
+    res.status(500).json({ message: 'Error al obtener videos', error: error.message });
+  }
 });
 
 app.listen(port, () => {

@@ -32,12 +32,11 @@ module.exports = {
         static: path.join(__dirname, 'dist'),
         compress: true,
         port: 3000,
-        historyApiFallback: true, // This is important for SPA routing
-        proxy: {
-            '/api': {
-                target: 'http://localhost:5000',
-                changeOrigin: true,
-            }
-        }
+        historyApiFallback: true,
+        proxy: [{
+            context: ['/api', '/uploads'],
+            target: 'http://localhost:5000',
+            changeOrigin: true,
+        }]
     },
 };

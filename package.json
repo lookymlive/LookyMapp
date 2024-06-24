@@ -5,7 +5,8 @@
   "proxy": "http://localhost:5000",
   "scripts": {
     "start": "webpack serve --mode development --open",
-    "build": "webpack --mode production"
+    "server": "node server/server.js",
+    "dev": "concurrently \"npm run server\" \"npm start\""
   },
   "keywords": [],
   "author": "",
